@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  mssql-db:
+    container_name: mssql-db
+    hostname: mssql-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    env_file:
+      - .env.dev
+    ports:
+      - 1433:1433
+      - 135:135
+      - 51000:51000
+    entrypoint: /container-setup/entrypoint.sh
+    volumes:
+      - ./container-setup:/container-setup
+      - ./mssql-db/data:/var/opt/mssql/data
+      - ./mssql-db/log:/var/opt/mssql/log
+      - ./mssql-db/secrets:/var/opt/mssql/secrets
