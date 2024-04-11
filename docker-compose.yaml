@@ -1,8 +1,7 @@
 version: "3.8"
 services:
-  mssql-db:
-    container_name: mssql-db
-    hostname: mssql-db
+  sql-server:
+    container_name: sql-server
     image: mcr.microsoft.com/mssql/server:2022-latest
     env_file:
       - .env.dev
@@ -10,9 +9,35 @@ services:
       - 1433:1433
       - 135:135
       - 51000:51000
-    entrypoint: /container-setup/entrypoint.sh
     volumes:
-      - ./container-setup:/container-setup
       - ./mssql-db/data:/var/opt/mssql/data
       - ./mssql-db/log:/var/opt/mssql/log
       - ./mssql-db/secrets:/var/opt/mssql/secrets
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${MSSQL_SA_PASSWORD} -Q 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+  sql-server.configurator:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    env_file:
+      - .env.dev
+    volumes:
+      - ./container-setup:/container-setup
+    depends_on:
+      sql-server:
+        condition: service_healthy
+    command: >
+      bash -c '
+      /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/databases-setup.sql;
+      echo "Sample databases were created.";
+      /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/triggers-setup.sql;
+      echo "Triggers were created.";
+      /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/sample-data.sql;
+      echo "Sample data inserted.";
+      '
