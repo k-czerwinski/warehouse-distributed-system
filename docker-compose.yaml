@@ -6,13 +6,13 @@ services:
     env_file:
       - .env.dev
     ports:
-      - 1433:1433
-      - 135:135
-      - 51000:51000
+      - ${MSSQL_TCP_PORT}:${MSSQL_TCP_PORT}
+      - ${MSSQL_RPC_PORT}:${MSSQL_RPC_PORT}
+      - ${MSSQL_DTC_TCP_PORT}:${MSSQL_DTC_TCP_PORT}
     volumes:
-      - ./mssql-db/data:/var/opt/mssql/data
-      - ./mssql-db/log:/var/opt/mssql/log
-      - ./mssql-db/secrets:/var/opt/mssql/secrets
+      - ./mssql-server/data:/var/opt/mssql/data
+      - ./mssql-server/log:/var/opt/mssql/log
+      - ./mssql-server/secrets:/var/opt/mssql/secrets
     healthcheck:
       test:
         [
@@ -34,10 +34,14 @@ services:
         condition: service_healthy
     command: >
       bash -c '
-      /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/databases-setup.sql;
-      echo "Sample databases were created.";
-      /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/triggers-setup.sql;
-      echo "Triggers were created.";
-      /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/sample-data.sql;
-      echo "Sample data inserted.";
+      if [ "${CREATE_SAMPLE_DATABASES}" == true ]; then
+        /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/databases-setup.sql;
+        echo "Sample databases were created.";
+        /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/triggers-setup.sql;
+        echo "Triggers were created.";
+      fi;
+      if [ "${ADD_SAMPLE_DATA}" == true ]; then
+        /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P ${MSSQL_SA_PASSWORD} -d master -i /container-setup/sample-data.sql;
+        echo "Sample data inserted.";
+      fi;
       '
