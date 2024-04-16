@@ -6,23 +6,17 @@ ON central.dbo.product
 AFTER INSERT
 AS
 BEGIN 
-    DECLARE @code bigint, @quantity int
-    SELECT @code = code, @quantity = 0 FROM inserted
-    -- Insert into warehouse1
     INSERT INTO warehouse1.dbo.product_storage (code, quantity)
-    SELECT code, 0 FROM inserted;
+    SELECT code, summary_quantity / 4 FROM inserted;
 
-    -- Insert into warehouse2
     INSERT INTO warehouse2.dbo.product_storage (code, quantity)
-    SELECT code, 0 FROM inserted;
+    SELECT code, summary_quantity / 4 FROM inserted;
 
-    -- Insert into warehouse3
     INSERT INTO warehouse3.dbo.product_storage (code, quantity)
-    SELECT code, 0 FROM inserted;
+    SELECT code, summary_quantity / 4 FROM inserted;
 
-    -- Insert into warehouse4
     INSERT INTO warehouse4.dbo.product_storage (code, quantity)
-    SELECT code, 0 FROM inserted;
+    SELECT code, summary_quantity - ((summary_quantity / 4 ) * 3) FROM inserted;
 END
 GO
 
