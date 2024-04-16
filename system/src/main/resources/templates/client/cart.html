@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart</title>
+  <script src="/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:insert="~{fragments/header::client-menu}"></div>
+<div class="container">
+  <h1>Shopping Cart</h1>
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Code</th>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Quantity</th>
+      <th>Price Per Item</th>
+      <th>Summary Price</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="entry : ${cart}">
+      <td th:text="${entry.key.code}"/>
+      <td th:text="${entry.key.name}"/>
+      <td th:text="${entry.key.category.name}"/>
+      <td th:text="${entry.value}"/>
+      <td th:text="${#numbers.formatCurrency(entry.key.price)}"/>
+      <td th:text="${#numbers.formatCurrency(entry.key.price * entry.value)}"></td>
+    </tr>
+    </tbody>
+  </table>
+  <div class="text-right">
+    <form th:action="@{/client/confirm-order}">
+      <select name="warehouse">
+        <option th:each="warehouse : ${T(com.bd2.warehousedistributedsystem.model.Warehouse).values()}" th:value="${warehouse}" th:text="${warehouse}"/>
+      </select>
+      <button class="btn btn-primary">Confirm Transaction</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

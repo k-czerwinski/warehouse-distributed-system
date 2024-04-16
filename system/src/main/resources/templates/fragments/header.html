@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+<nav th:fragment="client-menu" class="navbar navbar-expand-md bg-dark navbar-dark">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" th:href="@{/client/}">Electronic Shop</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li><a class="nav-link" th:href="@{/client/products}">View available products</a></li>
+      <li><a class="nav-link" th:href="@{/client/cart}">Cart</a></li>
+
+    </ul>
+  </div>
+</nav>
+<!--<div th:fragment="client-menu" class="nav-menu">-->
+<!--  <div class="left-nav">-->
+<!--    <a class="nav-element" th:href="@{/library/}">Main Menu</a>-->
+<!--    <a class="nav-element" th:href="@{/library/viewBooks}">View books collection</a>-->
+<!--    <a class="nav-element" th:href="@{/library/searchForBookForm}">Search for a book</a>-->
+<!--    <a class="nav-element" th:href="@{/library/returnBookForm}">Return a book</a>-->
+<!--  </div>-->
+<!--  <div class="user-controller-nav">-->
+<!--    <a class="nav-element" th:href="@{/library/cartView}">Cart</a>-->
+<!--    <a class="nav-element" th:href="@{/users/logout}">Logout</a>-->
+<!--  </div>-->
+<!--</div>-->
+<div th:fragment="admin-menu" class="nav-menu">
+  <div class="left-nav">
+    <a class="nav-element" th:href="@{/book-manager/}">Main Menu</a>
+    <a class="nav-element" th:href="@{/book-manager/addBookForm}">Add books</a>
+    <a class="nav-element" th:href="@{/book-manager/setBookAmountForm}">Set book amount</a>
+    <a class="nav-element" th:href="@{/book-manager/viewBooks}">View books</a>
+  </div>
+  <div class="user-controller-nav">
+    <a class="nav-element" th:href="@{/users/logout}">Logout</a>
+  </div>
+</div>
+<div th:fragment="non-signed-in-menu" class="nav-menu">
+  <div class="left-nav">
+    <a class="nav-element" th:href="@{/}">Main Menu</a>
+    <a class="nav-element" th:href="@{/library/}">Borrow Books</a>
+  </div>
+  <div class="user-controller-nav">
+    <a class="nav-element" th:href="@{/users/login}">Sign In</a>
+    <a class="nav-element" th:href="@{/users/registerForm}">Sign Up</a>
+  </div>
+</div>
+</body>
+</html>
