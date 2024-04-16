@@ -44,10 +44,11 @@ public class ClientController {
         try {
             clientService.confirmOrder(cart, warehouse);
             LOGGER.info("Order confirmed in warehouse %s".formatted(warehouse.name()));
+            model.addAttribute("success", true);
         } catch (Exception exception) {
             LOGGER.warning("Order cannot be confirmed in warehouse %s".formatted(warehouse.name()));
             LOGGER.warning("Exception: ".formatted(exception.getMessage()));
-            model.addAttribute("warning", "Order cannot be confirmed!");
+            model.addAttribute("error", true);
         }
         cart.clearCart();
         return "client/cart";

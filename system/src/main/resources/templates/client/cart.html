@@ -10,6 +10,18 @@
 <body>
 <div th:insert="~{fragments/header::client-menu}"></div>
 <div class="container">
+  <div class="container mt-5" th:if="${error}">
+    <div class="alert alert-danger">
+      <h4 class="alert-heading">Cannot confirm transaction. Rollback</h4>
+      <p class="mb-0">Some products may be not available in the selected warehouse or may be locked. Return to product page and try again</p>
+    </div>
+  </div>
+  <div class="container mt-5" th:if="${success}">
+    <div class="alert alert-info">
+      <h4 class="alert-heading">Transaction has been confirmed.</h4>
+      <p class="mb-0">We will shortly send your products.</p>
+    </div>
+  </div>
   <h1>Shopping Cart</h1>
   <table class="table">
     <thead>

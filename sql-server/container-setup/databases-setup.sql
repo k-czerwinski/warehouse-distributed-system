@@ -77,3 +77,37 @@ CREATE TABLE warehouse4.[dbo].[product_storage] (
   [quantity] int NOT NULL
 )
 GO
+
+-- CREATE USER TO BE USED BY APPLICATION
+USE master;
+CREATE LOGIN app WITH PASSWORD = 'Admin@123';
+
+USE central;
+CREATE USER app FOR LOGIN app;
+ALTER ROLE db_owner ADD MEMBER app;
+EXEC sp_sqljdbc_xa_install;
+EXEC sp_addrolemember [SqlJDBCXAUser], 'app';
+
+USE warehouse1;
+CREATE USER app FOR LOGIN app;
+ALTER ROLE db_owner ADD MEMBER app;
+EXEC sp_sqljdbc_xa_install;
+EXEC sp_addrolemember [SqlJDBCXAUser], 'app';
+
+USE warehouse2;
+CREATE USER app FOR LOGIN app;
+ALTER ROLE db_owner ADD MEMBER app;
+EXEC sp_sqljdbc_xa_install;
+EXEC sp_addrolemember [SqlJDBCXAUser], 'app';
+
+USE warehouse3;
+CREATE USER app FOR LOGIN app;
+ALTER ROLE db_owner ADD MEMBER app;
+EXEC sp_sqljdbc_xa_install;
+EXEC sp_addrolemember [SqlJDBCXAUser], 'app';
+
+USE warehouse4;
+CREATE USER app FOR LOGIN app;
+ALTER ROLE db_owner ADD MEMBER app;
+EXEC sp_sqljdbc_xa_install;
+EXEC sp_addrolemember [SqlJDBCXAUser], 'app';
