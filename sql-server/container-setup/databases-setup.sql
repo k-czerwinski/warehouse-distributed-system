@@ -5,7 +5,9 @@ CREATE TABLE central.[dbo].[product] (
   [code] bigint PRIMARY KEY NOT NULL IDENTITY(1, 1),
   [name] varchar(50) NOT NULL,
   [price] decimal NOT NULL,
-  [category_id] bigint NOT NULL
+  [category_id] bigint NOT NULL,
+  [is_locked] bit DEFAULT 0 NOT NULL,
+  [summary_quantity] int DEFAULT 0 NOT NULL
 )
 GO
 
