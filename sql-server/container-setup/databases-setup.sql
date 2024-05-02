@@ -37,6 +37,7 @@ CREATE TABLE central.[dbo].[order_product] (
   [order_id] bigint NOT NULL,
   [product_id] bigint NOT NULL,
   [warehouse_id] bigint NOT NULL,
+  [quantity] int NOT NULL,
   PRIMARY KEY ([order_id], [product_id], [warehouse_id])
 )
 GO
@@ -111,3 +112,10 @@ CREATE USER app FOR LOGIN app;
 ALTER ROLE db_owner ADD MEMBER app;
 EXEC sp_sqljdbc_xa_install;
 EXEC sp_addrolemember [SqlJDBCXAUser], 'app';
+
+INSERT INTO central.dbo.warehouse([name], [location])
+VALUES
+('warehouse1', 'Cracow'),
+('warehouse2', 'Warsaw'),
+('warehouse3', 'Gdansk'),
+('warehouse4', 'Poznan');

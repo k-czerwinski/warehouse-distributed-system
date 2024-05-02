@@ -1,45 +1,64 @@
 USE central
 GO
-CREATE PROCEDURE MakeOrderWarehouse1
+CREATE PROCEDURE MakeOrder
    @ProductCode bigint,
-   @Quantity int
+   @Quantity int,
+   @warehouseName varchar(20)
 AS
 BEGIN
-    SET NOCOUNT ON;
-		UPDATE warehouse1.dbo.product_storage set quantity = quantity - @Quantity where code = @ProductCode;
-		UPDATE central.dbo.product set summary_quantity = summary_quantity - @Quantity where code = @ProductCode;
+   SET NOCOUNT ON;
+    IF @warehouseName = 'warehouse1'
+    BEGIN
+        UPDATE warehouse1.dbo.product_storage SET quantity = quantity - @quantity WHERE code = @productCode;
+    END
+    ELSE IF @warehouseName = 'warehouse2'
+    BEGIN
+        UPDATE warehouse2.dbo.product_storage SET quantity = quantity - @quantity WHERE code = @productCode;
+    END
+    ELSE IF @warehouseName ='warehouse3'
+    BEGIN
+        UPDATE warehouse3.dbo.product_storage SET quantity = quantity - @quantity WHERE code = @productCode;
+    END
+    ELSE IF @warehouseName ='warehouse4'
+    BEGIN
+        UPDATE warehouse4.dbo.product_storage SET quantity = quantity - @quantity WHERE code = @productCode;
+    END
+    ELSE
+    BEGIN
+        RAISERROR ('Invalid warehouse Name', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+    
+    UPDATE central.dbo.product
+    SET summary_quantity = summary_quantity - @quantity
+    WHERE code = @productCode;
 END
 GO
+-------------------------
+CREATE PROCEDURE CreateNewOrder
+   @ordererName varchar(50),
+   @shippingAddress varchar(100),
+   @price int
+AS
+BEGIN
+   INSERT INTO central.dbo.[order] ([date], [price], [orderer_name], [shipping_address])
+   VALUES (GETDATE(), @price, @ordererName, @shippingAddress);
+END
+GO
+--------------------------------
+CREATE PROCEDURE AddProductToOrder
+   @warehouseName varchar(20),
+   @orderId bigint,
+   @productCode bigint,
+   @quantity int
+AS
+BEGIN
+   DECLARE @warehouseID bigint;
+   SELECT @warehouseID = id from central.dbo.warehouse where [name] = @warehouseName;
+   INSERT INTO central.dbo.order_product (order_id, product_id, warehouse_id, quantity)
+   VALUES (@orderId, @productCode, @warehouseID, @quantity);
+END
 
-CREATE PROCEDURE MakeOrderWarehouse2
-   @ProductCode bigint,
-   @Quantity int
-AS
-BEGIN
-    SET NOCOUNT ON;
-		UPDATE warehouse2.dbo.product_storage set quantity = quantity - @Quantity where code = @ProductCode;
-		UPDATE central.dbo.product set summary_quantity = summary_quantity - @Quantity where code = @ProductCode;
-END
-GO
 
-CREATE PROCEDURE MakeOrderWarehouse3
-   @ProductCode bigint,
-   @Quantity int
-AS
-BEGIN
-    SET NOCOUNT ON;
-		UPDATE warehouse3.dbo.product_storage set quantity = quantity - @Quantity where code = @ProductCode;
-		UPDATE central.dbo.product set summary_quantity = summary_quantity - @Quantity where code = @ProductCode;
-END
-GO
-
-CREATE PROCEDURE MakeOrderWarehouse4
-   @ProductCode bigint,
-   @Quantity int
-AS
-BEGIN
-    SET NOCOUNT ON;
-		UPDATE warehouse4.dbo.product_storage set quantity = quantity - @Quantity where code = @ProductCode;
-		UPDATE central.dbo.product set summary_quantity = summary_quantity - @Quantity where code = @ProductCode;
-END
-GO
+        

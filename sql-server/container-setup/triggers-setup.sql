@@ -45,6 +45,23 @@ BEGIN
 END
 GO
 
+CREATE TRIGGER DeleteProductFromWarehouses
+ON central.dbo.product
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @deletedProductCode bigint;
+
+    SELECT @deletedProductCode = deleted.code
+    FROM deleted;
+
+    DELETE FROM warehouse1.dbo.product_storage WHERE code = @deletedProductCode;
+    DELETE FROM warehouse2.dbo.product_storage WHERE code = @deletedProductCode;
+    DELETE FROM warehouse3.dbo.product_storage WHERE code = @deletedProductCode;
+    DELETE FROM warehouse4.dbo.product_storage WHERE code = @deletedProductCode;
+END
+GO
+
 USE warehouse1
 GO
 CREATE TRIGGER trigger_insert_product
