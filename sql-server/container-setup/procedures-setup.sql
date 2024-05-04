@@ -39,11 +39,12 @@ GO
 CREATE PROCEDURE CreateNewOrder
    @ordererName varchar(50),
    @shippingAddress varchar(100),
-   @price int
+   @price decimal
 AS
 BEGIN
-   INSERT INTO central.dbo.[order] ([date], [price], [orderer_name], [shipping_address])
+   INSERT INTO central.dbo.[purchase_order] ([date], [price], [orderer_name], [shipping_address])
    VALUES (GETDATE(), @price, @ordererName, @shippingAddress);
+   SELECT SCOPE_IDENTITY();
 END
 GO
 --------------------------------
@@ -56,7 +57,7 @@ AS
 BEGIN
    DECLARE @warehouseID bigint;
    SELECT @warehouseID = id from central.dbo.warehouse where [name] = @warehouseName;
-   INSERT INTO central.dbo.order_product (order_id, product_id, warehouse_id, quantity)
+   INSERT INTO central.dbo.order_product (purchase_order_id, product_id, warehouse_id, quantity)
    VALUES (@orderId, @productCode, @warehouseID, @quantity);
 END
 

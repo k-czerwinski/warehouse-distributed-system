@@ -1,12 +1,10 @@
 package com.bd2.warehousedistributedsystem.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
+@Builder
 public class AddToCartRequest {
     private Long productCode;
     private Integer quantity;

@@ -6,20 +6,22 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class ClientService {
     private final ClientRepository clientRepository;
 
     @Transactional()
-    public void confirmOrder(Cart cart, Warehouse warehouse) {
-        cart.getProductsInCart().entrySet().stream().forEach(entry -> {
-            switch (warehouse) {
-                case WAREHOUSE1 -> clientRepository.confirmProductOrderInWarehouse1(entry.getKey().getCode(), entry.getValue());
-                case WAREHOUSE2 -> clientRepository.confirmProductOrderInWarehouse2(entry.getKey().getCode(), entry.getValue());
-                case WAREHOUSE3 -> clientRepository.confirmProductOrderInWarehouse3(entry.getKey().getCode(), entry.getValue());
-                case WAREHOUSE4 -> clientRepository.confirmProductOrderInWarehouse4(entry.getKey().getCode(), entry.getValue());
-            }
+    public void confirmOrder(Cart cart, Warehouse warehouse, String ordererName, String shippingAddress) {
+        cart.getProductsInCart().entrySet().forEach(entry -> {
+            clientRepository.decreaseProductCount(entry.getKey().getCode(), entry.getValue(), warehouse.getOfficialName());
+        });
+        BigDecimal price = cart.getProductsInCart().entrySet().stream().map(entry -> entry.getKey().getPrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Long orderId = clientRepository.createNewOrder(ordererName, shippingAddress, price);
+        cart.getProductsInCart().entrySet().forEach(entry -> {
+            clientRepository.assignProductToOrder(warehouse.getOfficialName(), orderId, entry.getKey().getCode(), entry.getValue());
         });
     }
 }

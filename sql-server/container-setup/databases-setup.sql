@@ -24,7 +24,7 @@ CREATE TABLE central.[dbo].[warehouse] (
 )
 GO
 
-CREATE TABLE central.[dbo].[order] (
+CREATE TABLE central.[dbo].[purchase_order] (
   [id] bigint PRIMARY KEY NOT NULL IDENTITY(1, 1),
   [date] datetime NOT NULL,
   [price] decimal NOT NULL,
@@ -34,16 +34,16 @@ CREATE TABLE central.[dbo].[order] (
 GO
 
 CREATE TABLE central.[dbo].[order_product] (
-  [order_id] bigint NOT NULL,
+  [purchase_order_id] bigint NOT NULL,
   [product_id] bigint NOT NULL,
   [warehouse_id] bigint NOT NULL,
   [quantity] int NOT NULL,
-  PRIMARY KEY ([order_id], [product_id], [warehouse_id])
+  PRIMARY KEY ([purchase_order_id], [product_id], [warehouse_id])
 )
 GO
 
 ALTER TABLE central.[dbo].[product] ADD FOREIGN KEY ([category_id]) REFERENCES central.[dbo].[category] ([id])
-ALTER TABLE central.[dbo].[order_product] ADD FOREIGN KEY ([order_id]) REFERENCES central.[dbo].[order] ([id])
+ALTER TABLE central.[dbo].[order_product] ADD FOREIGN KEY ([purchase_order_id]) REFERENCES central.[dbo].[purchase_order] ([id])
 ALTER TABLE central.[dbo].[order_product] ADD FOREIGN KEY ([product_id]) REFERENCES central.[dbo].[product] ([code])
 ALTER TABLE central.[dbo].[order_product] ADD FOREIGN KEY ([warehouse_id]) REFERENCES central.[dbo].[warehouse] ([id])
 

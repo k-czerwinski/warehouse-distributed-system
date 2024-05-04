@@ -46,10 +46,20 @@
     </tbody>
   </table>
   <div class="text-right">
-    <form th:action="@{/client/confirm-order}">
-      <select name="warehouse">
-        <option th:each="warehouse : ${T(com.bd2.warehousedistributedsystem.model.Warehouse).values()}" th:value="${warehouse}" th:text="${warehouse}"/>
-      </select>
+    <form th:action="@{/client/confirm-cart}" method="post">
+      <div class="form-group">
+        <select name="warehouse">
+          <option th:each="warehouse : ${T(com.bd2.warehousedistributedsystem.model.Warehouse).values()}" th:value="${warehouse}" th:text="${warehouse}"/>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="orderer-name" class="form-label">Identity</label>
+        <input type="text" id="orderer-name" class="form-control" name="ordererName" required>
+      </div>
+      <div class="form-group">
+        <label for="shipping-address" class="form-label">Shipping Address</label>
+        <input type="text" id="shipping-address" class="form-control" name="shippingAddress" required>
+      </div>
       <button class="btn btn-primary">Confirm Transaction</button>
     </form>
   </div>
