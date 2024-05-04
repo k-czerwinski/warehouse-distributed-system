@@ -67,15 +67,15 @@ public class ClientController {
 
     @PostMapping(value = "/products/add-to-cart")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> addToCart(@RequestBody AddToCartRequest addToCartRequest,
+    public ResponseEntity<String> addToCart(@RequestBody ProductQuantityRequest productQuantityRequest,
                                             @CookieValue(value = "productCodes", defaultValue = "") String productCodesString,
                                             HttpServletResponse response) {
-        Product product = clientRepository.findByCode(addToCartRequest.getProductCode()).orElseThrow(EntityNotFoundException::new);
+        Product product = clientRepository.findByCode(productQuantityRequest.getProductCode()).orElseThrow(EntityNotFoundException::new);
         Map<Long, Integer> products = Cart.getProductCodesListFromCookie(productCodesString);
-        products.put(addToCartRequest.getProductCode(), products.getOrDefault(addToCartRequest.getProductCode(), 0)
-                    + addToCartRequest.getQuantity());
+        products.put(productQuantityRequest.getProductCode(), products.getOrDefault(productQuantityRequest.getProductCode(), 0)
+                    + productQuantityRequest.getQuantity());
         response.addCookie(createCartCookie(Cart.toProductCodesString(products)));
-        LOGGER.info("%s has been added to cart in quantity: %s".formatted(product.getName(), addToCartRequest.getQuantity()));
+        LOGGER.info("%s has been added to cart in quantity: %s".formatted(product.getName(), productQuantityRequest.getQuantity()));
         return ResponseEntity.ok("Product added succesfully");
     }
 

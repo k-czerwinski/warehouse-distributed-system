@@ -17,7 +17,7 @@ INSERT INTO central.dbo.product (name, price, category_id, summary_quantity, is_
 ('Smartwatch', 249.99, 2, 21, 0),
 ('Smart Glasses', 399.99, 2, 37, 0),
 ('GPS Tracker', 59.99, 2, 20, 0),
-('Locked product 1', 129.99, 2, 20, 0),
+('Locked product 1', 129.99, 2, 20, 1),
 ('Locked product 2', 79.99, 3, 20, 1),
 ('Virtual Reality Headset', 299.99, 3, 20, 0),
 ('Bluetooth Speaker', 49.99, 3, 20, 0),

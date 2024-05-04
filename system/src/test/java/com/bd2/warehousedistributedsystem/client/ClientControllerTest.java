@@ -1,6 +1,6 @@
 package com.bd2.warehousedistributedsystem.client;
 
-import com.bd2.warehousedistributedsystem.model.AddToCartRequest;
+import com.bd2.warehousedistributedsystem.model.ProductQuantityRequest;
 import com.bd2.warehousedistributedsystem.model.Product;
 import com.bd2.warehousedistributedsystem.model.Warehouse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +42,7 @@ class ClientControllerTest {
 
     @Test
     void shoudAddToCart() throws Exception {
-        AddToCartRequest addToCartRequest = AddToCartRequest.builder()
+        ProductQuantityRequest productQuantityRequest = ProductQuantityRequest.builder()
                 .productCode(10l)
                 .quantity(15)
                 .build();
@@ -51,7 +51,7 @@ class ClientControllerTest {
         mockMvc.perform(post("/client/products/add-to-cart")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.ALL)
-                        .content(asJsonString(addToCartRequest)))
+                        .content(asJsonString(productQuantityRequest)))
                 .andExpect(status().isOk());
     }
 

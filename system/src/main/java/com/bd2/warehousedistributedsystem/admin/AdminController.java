@@ -4,15 +4,14 @@ import com.bd2.warehousedistributedsystem.client.CategoryRepository;
 import com.bd2.warehousedistributedsystem.common.ProductRepository;
 import com.bd2.warehousedistributedsystem.common.PurchaseOrderRepository;
 import com.bd2.warehousedistributedsystem.model.ProductDTO;
+import com.bd2.warehousedistributedsystem.model.ProductQuantityRequest;
+import com.bd2.warehousedistributedsystem.model.Warehouse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/admin")
@@ -58,5 +57,18 @@ public class AdminController {
     public String getOrderDetails(Model model, @PathVariable("order_id") Long orderId) {
         model.addAttribute("order", purchaseOrderRepository.findById(orderId).orElseThrow());
         return "admin/order-details";
+    }
+
+    @GetMapping(value = "/warehouse/{warehouse_name}/products")
+    public String getProductForWarehouse(Model model, @PathVariable("warehouse_name") Warehouse warehouse) {
+        model.addAttribute("productsMap", adminService.getProductsWithQuantitiesInWarehouse(warehouse));
+        model.addAttribute("warehouse", warehouse);
+        return "admin/warehouse-product";
+    }
+
+    @PatchMapping (value = "/warehouse/{warehouse_name}/update-quantity")
+    public ResponseEntity<String> updateProductQuantity(Model model, @PathVariable("warehouse_name") Warehouse warehouse, @RequestBody ProductQuantityRequest body) {
+        productRepository.updateProductCountInWarehouse(body.getProductCode(), warehouse.getOfficialName(), body.getQuantity());
+        return ResponseEntity.status(200).build();
     }
 }

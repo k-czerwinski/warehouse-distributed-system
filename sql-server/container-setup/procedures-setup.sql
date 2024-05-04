@@ -60,6 +60,79 @@ BEGIN
    INSERT INTO central.dbo.order_product (purchase_order_id, product_id, warehouse_id, quantity)
    VALUES (@orderId, @productCode, @warehouseID, @quantity);
 END
+GO
+-----------------------------------------
+CREATE PROCEDURE GetProductCount
+	@productCode bigint,
+	@warehouseName varchar(20)
+AS
+BEGIN
+	IF @warehouseName = 'warehouse1'
+    BEGIN
+        SELECT quantity from warehouse1.dbo.product_storage where code = @productCode;
+    END
+    ELSE IF @warehouseName = 'warehouse2'
+    BEGIN
+        SELECT quantity from warehouse2.dbo.product_storage where code = @productCode;
+    END
+    ELSE IF @warehouseName ='warehouse3'
+    BEGIN
+        SELECT quantity from warehouse3.dbo.product_storage where code = @productCode;
+    END
+    ELSE IF @warehouseName ='warehouse4'
+    BEGIN
+        SELECT quantity from warehouse4.dbo.product_storage where code = @productCode;
+    END
+	ELSE
+    BEGIN
+        RAISERROR ('Invalid warehouse Name', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+    
+END
+GO
+------------------------------------------------------------------
+CREATE PROCEDURE UpdateProductCount
+	@productCode bigint,
+	@warehouseName varchar(20),
+	@quantity int
+AS
+BEGIN
+    DECLARE @initialProductCount int;
+
+	IF @warehouseName = 'warehouse1'
+    BEGIN
+        SELECT @initialProductCount = quantity from warehouse1.dbo.product_storage where code = @productCode;
+        UPDATE warehouse1.dbo.product_storage SET quantity = @quantity where code = @productCode;
+    END
+    ELSE IF @warehouseName = 'warehouse2'
+    BEGIN
+        SELECT @initialProductCount = quantity from warehouse2.dbo.product_storage where code = @productCode;
+        UPDATE warehouse2.dbo.product_storage SET quantity = @quantity where code = @productCode;
+    END
+    ELSE IF @warehouseName ='warehouse3'
+    BEGIN
+        SELECT @initialProductCount = quantity from warehouse3.dbo.product_storage where code = @productCode;
+        UPDATE warehouse3.dbo.product_storage SET quantity = @quantity where code = @productCode;
+    END
+    ELSE IF @warehouseName ='warehouse4'
+    BEGIN
+        SELECT @initialProductCount = quantity from warehouse4.dbo.product_storage where code = @productCode;
+        UPDATE warehouse4.dbo.product_storage SET quantity = @quantity where code = @productCode;
+    END
+	ELSE
+    BEGIN
+        RAISERROR ('Invalid warehouse Name', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    UPDATE central.dbo.product
+    SET summary_quantity = summary_quantity - @initialProductCount + @quantity
+    WHERE code = @productCode;
+END
+GO
 
 
         
