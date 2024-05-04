@@ -34,7 +34,7 @@ public class ClientController {
 
     @GetMapping(value = "/products")
     public String products(Model model) {
-        List<Product> productList = clientRepository.findAll();
+        List<Product> productList = clientRepository.findAllByLockedIs(false);
         model.addAttribute("products", productList);
         return "client/products";
     }

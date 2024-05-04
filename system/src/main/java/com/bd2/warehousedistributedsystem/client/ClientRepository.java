@@ -15,6 +15,7 @@ import java.util.Optional;
 @Repository
 public interface ClientRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByCategory(Category category);
+    List<Product> findAllByLockedIs(boolean isLocked);
     Optional<Product> findByCode(long code);
 
     @Procedure(procedureName = "MakeOrder")

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Products</title>
+  <script src="/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:insert="~{fragments/header::admin-menu}"></div>
+<div class="container">
+  <h1>Product List</h1>
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Code</th>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Lock</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="product : ${products}">
+      <td th:text="${product.code}"></td>
+      <td th:text="${product.name}"></td>
+      <td th:text="${product.category.name}"></td>
+      <td th:text="${#numbers.formatCurrency(product.price)}"></td>
+      <td th:text="${product.quantity}"></td>
+      <td th:id="${'product-locked-' + product.code}">
+        <div th:if="${product.locked == true}">
+          Locked
+        </div>
+        <div th:unless="${product.locked == true}">
+          <button class="btn btn-primary" th:onclick="lockProduct([[${product.code}]])">Lock</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<script>
+  function lockProduct(productCode) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/admin/product/" + productCode + "/lock", true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var element = document.getElementById("product-locked-" + productCode);
+        element.innerHTML = "Locked"
+        alert("Product has been locked!")
+      }
+    };
+    xhr.send();
+  }
+</script>
+</body>
+</html>

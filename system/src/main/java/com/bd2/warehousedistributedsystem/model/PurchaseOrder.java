@@ -28,11 +28,4 @@ public class PurchaseOrder {
     @OneToMany(mappedBy = "purchaseOrder")
     @ToString.Exclude
     private List<OrderProduct> products;
-
-    public PurchaseOrder(Timestamp date, BigDecimal price, String ordererName, String shippingAddress) {
-        this.date = date;
-        this.price = price;
-        this.ordererName = ordererName;
-        this.shippingAddress = shippingAddress;
-    }
 }

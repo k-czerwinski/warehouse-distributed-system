@@ -18,7 +18,8 @@ public class ClientService {
         cart.getProductsInCart().entrySet().forEach(entry -> {
             clientRepository.decreaseProductCount(entry.getKey().getCode(), entry.getValue(), warehouse.getOfficialName());
         });
-        BigDecimal price = cart.getProductsInCart().entrySet().stream().map(entry -> entry.getKey().getPrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal price = cart.getProductsInCart().entrySet().stream().map(entry -> entry.getKey().getPrice().multiply(BigDecimal.valueOf(entry.getValue())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         Long orderId = clientRepository.createNewOrder(ordererName, shippingAddress, price);
         cart.getProductsInCart().entrySet().forEach(entry -> {
             clientRepository.assignProductToOrder(warehouse.getOfficialName(), orderId, entry.getKey().getCode(), entry.getValue());
