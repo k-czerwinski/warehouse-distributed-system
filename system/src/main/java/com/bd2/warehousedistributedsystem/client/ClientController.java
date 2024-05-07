@@ -2,15 +2,15 @@ package com.bd2.warehousedistributedsystem.client;
 
 import com.bd2.warehousedistributedsystem.common.PurchaseOrderRepository;
 import com.bd2.warehousedistributedsystem.model.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/client")
 @RequiredArgsConstructor
 public class ClientController {
@@ -27,44 +27,52 @@ public class ClientController {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final ClientService clientService;
 
-    @GetMapping("/")
-    public String mainPage() {
-        return "index";
-    }
-
+    @Operation(summary = "Get available products")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All products which are not locked"),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping(value = "/products")
-    public String products(Model model) {
-        List<Product> productList = clientRepository.findAllByLockedIs(false);
-        model.addAttribute("products", productList);
-        return "client/products";
+    public List<Product> products() {
+        return clientRepository.findAllByLockedIs(false);
     }
 
+    @Operation(summary = "Get products stored in cart")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Products in cart", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping(value = "/cart")
-    public String cart(Model model, @CookieValue(value = "productCodes", defaultValue = "") String productCodesString) {
+    public Map<Product, Integer> cart(@CookieValue(value = "productCodes", defaultValue = "") String productCodesString) {
         Map<Long, Integer> productsMap = Cart.getProductCodesListFromCookie(productCodesString);
-        model.addAttribute("cart", mapProductCodes(productsMap));
-        return "client/cart";
+        return mapProductCodes(productsMap);
     }
 
-    @PostMapping(value = "/confirm-cart", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String confirmOrder(Model model, ConfirmOrderRequest body,
+    @Operation(summary = "Create order with selected products")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order has been confirmed."),
+            @ApiResponse(responseCode = "404", description = "Order could not be confirmed, there is insufficent number of products in selected warehouse or product is locked."),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
+    @PostMapping(value = "/confirm-cart")
+    public ResponseEntity<String> confirmOrder(ConfirmOrderRequest body,
                                      @CookieValue(value = "productCodes", defaultValue = "") String productCodesString,
                                      HttpServletResponse response) {
         Cart cart = new Cart(mapProductCodes(Cart.getProductCodesListFromCookie(productCodesString)));
         try {
             clientService.confirmOrder(cart, body.warehouse(), body.ordererName(), body.shippingAddress());
             LOGGER.info("Cart confirmed in warehouse %s".formatted(body.warehouse().name()));
-            model.addAttribute("success", true);
             response.addCookie(createCartCookie(""));
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             LOGGER.warning("Cart cannot be confirmed in warehouse %s".formatted(body.warehouse().name()));
             LOGGER.warning("Exception: %s".formatted(exception.getMessage()));
-            model.addAttribute("error", true);
-            model.addAttribute("cart", cart.getProductsInCart());
         }
-        return "client/cart";
+        return ResponseEntity.notFound().build();
     }
 
+    @Operation(summary = "Add product to cart", description = "Add product to cart, products ids and quantities are stored in cookies.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product has been added to cart."),
+            @ApiResponse(responseCode = "404", description = "Product has not been found."),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @PostMapping(value = "/products/add-to-cart")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> addToCart(@RequestBody ProductQuantityRequest productQuantityRequest,

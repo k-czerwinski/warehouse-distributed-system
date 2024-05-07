@@ -3,17 +3,19 @@ package com.bd2.warehousedistributedsystem.admin;
 import com.bd2.warehousedistributedsystem.client.CategoryRepository;
 import com.bd2.warehousedistributedsystem.common.ProductRepository;
 import com.bd2.warehousedistributedsystem.common.PurchaseOrderRepository;
-import com.bd2.warehousedistributedsystem.model.ProductDTO;
-import com.bd2.warehousedistributedsystem.model.ProductQuantityRequest;
-import com.bd2.warehousedistributedsystem.model.Warehouse;
+import com.bd2.warehousedistributedsystem.model.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.List;
+import java.util.Map;
+
+@RestController
 @RequestMapping("/admin")
 @AllArgsConstructor
 public class AdminController {
@@ -22,53 +24,76 @@ public class AdminController {
     private final CategoryRepository categoryRepository;
     private final AdminService adminService;
 
+    @Operation(summary = "Get basic informations about all orders")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "All created orders has been returned"),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping("/orders")
-    public String getOrders(Model model) {
-        model.addAttribute("orders", purchaseOrderRepository.findAll());
-        return "admin/orders";
+    public List<PurchaseOrder> getOrders() {
+        return purchaseOrderRepository.findAll();
     }
 
+    @Operation(summary = "Get all products")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "All products returned"),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping("/products")
-    public String getProducts(Model model) {
-        model.addAttribute("products", productRepository.findAll());
-        return "admin/products";
+    public List<Product> getProducts() {
+        return productRepository.findAll();
     }
 
+    @Operation(summary = "Lock product", description = "Lock product with id passed inside body.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product has been locked."),
+            @ApiResponse(responseCode = "404", description = "Product has not been found."),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping("/product/{product_code}/lock")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> lockProduct(@PathVariable(name = "product_code") Long productCode) {
         adminService.lockProduct(productCode);
         return ResponseEntity.status(200).build();
     }
 
-    @GetMapping("/product/add")
-    public String addProductPage(Model model) {
-        model.addAttribute("categories", categoryRepository.findAll());
-        return "admin/add-product";
-    }
-
-    @PostMapping(value = "/product/save-product", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String saveProduct(Model model, ProductDTO productDTO) {
+    @Operation(summary = "Save new products", description = "Save new product in central warehouse. Add entry in product_storage in all warehouses databases.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product has been saved."),
+            @ApiResponse(responseCode = "404", description = "Invalid category or other fields."),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = "/product/save-product")
+    public void saveProduct(ProductDTO productDTO) {
         adminService.saveProduct(productDTO);
-        model.addAttribute("success", true);
-        return "admin/add-product";
     }
 
+    @Operation(summary = "Get order details", description = "Get details about order which id is passed")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order details returned."),
+            @ApiResponse(responseCode = "404", description = "Order with given id do not exist."),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping(value = "/order/{order_id}")
-    public String getOrderDetails(Model model, @PathVariable("order_id") Long orderId) {
-        model.addAttribute("order", purchaseOrderRepository.findById(orderId).orElseThrow());
-        return "admin/order-details";
+    public PurchaseOrder getOrderDetails( @PathVariable("order_id") Long orderId) {
+        return purchaseOrderRepository.findById(orderId).orElseThrow();
     }
 
+    @Operation(summary = "Get products in specified warehouse", description = "Get all products stored in specified warehouse, information includes quanity of product in that warehouse.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success."),
+            @ApiResponse(responseCode = "404", description = "Warehouse is not available or not exists."),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping(value = "/warehouse/{warehouse_name}/products")
-    public String getProductForWarehouse(Model model, @PathVariable("warehouse_name") Warehouse warehouse) {
-        model.addAttribute("productsMap", adminService.getProductsWithQuantitiesInWarehouse(warehouse));
-        model.addAttribute("warehouse", warehouse);
-        return "admin/warehouse-product";
+    public Map<Product, Integer> getProductForWarehouse(@PathVariable("warehouse_name") Warehouse warehouse) {
+        return adminService.getProductsWithQuantitiesInWarehouse(warehouse);
     }
 
+    @Operation(summary = "Update quantity of product in specified warehouse")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success."),
+            @ApiResponse(responseCode = "404", description = "Warehouse or product is not available or not exists."),
+            @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @PatchMapping (value = "/warehouse/{warehouse_name}/update-quantity")
-    public ResponseEntity<String> updateProductQuantity(Model model, @PathVariable("warehouse_name") Warehouse warehouse, @RequestBody ProductQuantityRequest body) {
+    @ResponseStatus(HttpStatus.OK)
+    public void updateProductQuantity(@PathVariable("warehouse_name") Warehouse warehouse, @RequestBody ProductQuantityRequest body) {
+        productRepository.findById(body.getProductCode()).orElseThrow();
         productRepository.updateProductCountInWarehouse(body.getProductCode(), warehouse.getOfficialName(), body.getQuantity());
-        return ResponseEntity.status(200).build();
     }
 }
