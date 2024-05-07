@@ -1,6 +1,5 @@
 package com.bd2.warehousedistributedsystem.client;
 
-import com.bd2.warehousedistributedsystem.common.PurchaseOrderRepository;
 import com.bd2.warehousedistributedsystem.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 public class ClientController {
     private static final Logger LOGGER = Logger.getLogger("ClientController");
     private final ClientRepository clientRepository;
-    private final PurchaseOrderRepository purchaseOrderRepository;
     private final ClientService clientService;
 
     @Operation(summary = "Get available products")
