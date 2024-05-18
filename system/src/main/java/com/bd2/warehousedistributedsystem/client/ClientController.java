@@ -50,7 +50,7 @@ public class ClientController {
             @ApiResponse(responseCode = "404", description = "Order could not be confirmed, there is insufficent number of products in selected warehouse or product is locked."),
             @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @PostMapping(value = "/confirm-cart")
-    public ResponseEntity<String> confirmOrder(ConfirmOrderRequest body,
+    public ResponseEntity<String> confirmOrder(@RequestBody ConfirmOrderRequest body,
                                      @CookieValue(value = "productCodes", defaultValue = "") String productCodesString,
                                      HttpServletResponse response) {
         Cart cart = new Cart(mapProductCodes(Cart.getProductCodesListFromCookie(productCodesString)));

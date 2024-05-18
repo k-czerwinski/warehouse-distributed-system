@@ -1,6 +1,5 @@
 package com.bd2.warehousedistributedsystem.admin;
 
-import com.bd2.warehousedistributedsystem.client.CategoryRepository;
 import com.bd2.warehousedistributedsystem.common.ProductRepository;
 import com.bd2.warehousedistributedsystem.common.PurchaseOrderRepository;
 import com.bd2.warehousedistributedsystem.model.*;
@@ -9,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +19,6 @@ import java.util.Map;
 public class AdminController {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
     private final AdminService adminService;
 
     @Operation(summary = "Get basic informations about all orders")
@@ -49,19 +46,18 @@ public class AdminController {
             @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping("/product/{product_code}/lock")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> lockProduct(@PathVariable(name = "product_code") Long productCode) {
+    public void lockProduct(@PathVariable(name = "product_code") Long productCode) {
         adminService.lockProduct(productCode);
-        return ResponseEntity.status(200).build();
     }
 
-    @Operation(summary = "Save new products", description = "Save new product in central warehouse. Add entry in product_storage in all warehouses databases.")
+    @Operation(summary = "Save new product", description = "Save new product in central warehouse. Add entry in product_storage in all warehouses databases.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Product has been saved."),
             @ApiResponse(responseCode = "404", description = "Invalid category or other fields."),
             @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping(value = "/product/save-product")
-    public void saveProduct(ProductDTO productDTO) {
+    @PostMapping(value = "/product")
+    public void saveProduct(@RequestBody ProductDTO productDTO) {
         adminService.saveProduct(productDTO);
     }
 
@@ -71,7 +67,7 @@ public class AdminController {
             @ApiResponse(responseCode = "404", description = "Order with given id do not exist."),
             @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @GetMapping(value = "/order/{order_id}")
-    public PurchaseOrder getOrderDetails( @PathVariable("order_id") Long orderId) {
+    public PurchaseOrder getOrderDetails(@PathVariable("order_id") Long orderId) {
         return purchaseOrderRepository.findById(orderId).orElseThrow();
     }
 

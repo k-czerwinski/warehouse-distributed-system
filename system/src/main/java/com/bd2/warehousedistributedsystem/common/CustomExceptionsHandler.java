@@ -14,6 +14,4 @@ public class CustomExceptionsHandler {
     public ResponseEntity<String> handleResourceNotFoundException(Exception ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
-
-    // You can add more exception handlers for different exceptions if needed
 }

@@ -41,6 +41,7 @@ class ClientControllerTest {
         when(clientRepository.findByCode(anyLong())).thenReturn(Optional.ofNullable(Product.builder().name("test").build()));
 
         ResultActions resultActions = mockMvc.perform(post("/client/confirm-cart")
+                        .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(new ConfirmOrderRequest("ABC", "ABC", Warehouse.WAREHOUSE1)))
                 .cookie(new Cookie("productCodes", "1.1")));
 
