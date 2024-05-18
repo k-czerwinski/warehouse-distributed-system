@@ -73,7 +73,7 @@ public class ClientController {
             @ApiResponse(responseCode = "500", description = "Unexpected error.")})
     @PostMapping(value = "/products/add-to-cart")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> addToCart(@RequestBody ProductQuantityRequest productQuantityRequest,
+    public void addToCart(@RequestBody ProductQuantityRequest productQuantityRequest,
                                             @CookieValue(value = "productCodes", defaultValue = "") String productCodesString,
                                             HttpServletResponse response) {
         Product product = clientRepository.findByCode(productQuantityRequest.getProductCode()).orElseThrow(EntityNotFoundException::new);
@@ -82,7 +82,6 @@ public class ClientController {
                     + productQuantityRequest.getQuantity());
         response.addCookie(createCartCookie(Cart.toProductCodesString(products)));
         LOGGER.info("%s has been added to cart in quantity: %s".formatted(product.getName(), productQuantityRequest.getQuantity()));
-        return ResponseEntity.ok("Product added succesfully");
     }
 
     private Map<Product, Integer> mapProductCodes(Map<Long, Integer> productCodes) {
